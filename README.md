@@ -11,6 +11,7 @@ The system bridges computer graphics, geometric path planning, and real-world ro
 * 🧭 Deterministic queued motion execution
 * 📐 Human-robot interaction of alignment correction for real-world paper handling
 ## System Pipeline
+```text
 FULL PIPELINE: SVG → Robot Handwriting (Dobot)
 
  ┌──────────────────────────────────────────────────────────────────┐
@@ -100,6 +101,7 @@ OPTIONAL RELATED SCRIPT (Manual demo / quick test):
  │  - Conditional motion based on user input                          │
  │  - Useful for workspace checks and quick motion tests              │
  └──────────────────────────────────────────────────────────────────┘
+```
 ## Repository Structure
 ```graphql
 Image-to-Trajectory_Robot_Controller
