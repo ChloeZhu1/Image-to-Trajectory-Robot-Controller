@@ -11,25 +11,103 @@ The system bridges computer graphics, geometric path planning, and real-world ro
 * 🧭 Deterministic queued motion execution
 * 📐 Human-robot interaction of alignment correction for real-world paper handling
 ## System Pipeline
-flowchart TD
-  A[SVG Character Files<br/>(vector strokes)] --> B[read.py<br/>Parse polylines + extract points]
-  B --> C[Normalize + scale coordinates<br/>(origin shift, /450)]
-  C --> D[Stroke TXT Files<br/>char/&lt;CHAR&gt;.txt<br/>x y lines + "s" stroke separators]
+FULL PIPELINE: SVG → Robot Handwriting (Dobot)
 
-  D --> E[write_1.py<br/>Stroke-level execution]
-  E --> E1[Pen up: move to stroke start]
-  E1 --> E2[Pen down: lower to writing depth]
-  E2 --> E3[Trace points at constant Z]
-  E3 --> E4[Pen up: raise to safe Z]
+ ┌──────────────────────────────────────────────────────────────────┐
+ │  0) INPUT ASSETS                                                  │
+ │                                                                  │
+ │   Character / glyph stored as SVG (vector strokes)                │
+ │   e.g. "一.svg" , "春.svg" , ...                                  │
+ └───────────────┬──────────────────────────────────────────────────┘
+                 │
+                 ▼
+ ┌──────────────────────────────────────────────────────────────────┐
+ │  1) SVG PARSING + NORMALIZATION                                   │
+ │  Script: read.py                                                  │
+ │                                                                  │
+ │   - Reads SVG line-by-line                                        │
+ │   - Extracts polyline points from points="x,y x,y ..."            │
+ │   - Finds an origin (org_x, org_y)                                │
+ │   - Normalizes & scales: (x-org_x)/450 , (y-org_y)/450            │
+ │   - Inserts stroke separators: "s\n"                              │
+ │                                                                  │
+ │  Output: per-character stroke file                                │
+ │   char/<CHAR>.txt                                                 │
+ │   Format:                                                        │
+ │     s                                                            │
+ │     x y                                                          │
+ │     x y                                                          │
+ │     ...                                                          │
+ │     s                                                            │
+ │     ...                                                          │
+ └───────────────┬──────────────────────────────────────────────────┘
+                 │
+                 ▼
+ ┌──────────────────────────────────────────────────────────────────┐
+ │  2) STROKE-LEVEL EXECUTION (Single Character)                      │
+ │  Script: write_1.py                                               │
+ │                                                                  │
+ │   Input: one stroke block from <CHAR>.txt                         │
+ │                                                                  │
+ │   Robot actions (for each stroke):                                │
+ │     1) PEN UP:  move to first (x0,y0) at safe Z                    │
+ │     2) PEN DOWN: lower to writing depth (deepth / depth)           │
+ │     3) DRAW:    follow all points (xi,yi) at constant Z            │
+ │     4) PEN UP:  raise to safe Z                                    │
+ │                                                                  │
+ │   Uses:                                                           │
+ │     - Dobot DLL via DobotDllType (ctypes bindings)                 │
+ │     - queued motion commands + wait for completion                 │
+ └───────────────┬──────────────────────────────────────────────────┘
+                 │
+                 ▼
+ ┌──────────────────────────────────────────────────────────────────┐
+ │  3) POEM / PAGE-LEVEL ORCHESTRATION (Multiple Characters)          │
+ │  Script: model_4.py                                               │
+ │                                                                  │
+ │   Input: full poem typed by user (characters separated by spaces) │
+ │                                                                  │
+ │   Layout engine:                                                  │
+ │     - Iterates a 4×7 grid (columns×rows)                           │
+ │     - For each character:                                         │
+ │         loads char/<CHAR>.txt                                     │
+ │         iterates strokes ("s\n" separators)                        │
+ │         executes strokes via PTP commands                          │
+ │                                                                  │
+ │   Real-world handling:                                             │
+ │     - Paper reposition prompts                                    │
+ │     - Alignment correction from point.txt (getdy())                │
+ └───────────────┬──────────────────────────────────────────────────┘
+                 │
+                 ▼
+ ┌──────────────────────────────────────────────────────────────────┐
+ │  4) ROBOT CONTROL LAYER                                            │
+ │  Library: DobotDllType + DobotDll.dll                              │
+ │                                                                  │
+ │   - ConnectDobot / DisconnectDobot                                 │
+ │   - SetPTP*Params (speed/accel)                                    │
+ │   - SetPTPCmd / SetPTPWithLCmd (Cartesian moves)                   │
+ │   - Queued command execution + status polling                      │
+ │                                                                  │
+ │  Physical result: Dobot arm moves a pen over paper to write glyphs │
+ └──────────────────────────────────────────────────────────────────┘
 
-  D --> F[model_4.py<br/>Poem/page-level orchestration]
-  F --> F1[Grid layout (e.g., 4×7)]
-  F1 --> F2[Load each character's TXT]
-  F2 --> F3[Execute strokes sequentially]
-  F3 --> F4[Manual paper alignment + correction<br/>(point.txt → dy)]
 
-  E4 --> G[Dobot SDK Layer<br/>(DobotDllType + DobotDll.dll)]
-  F4 --> G
-  G --> H[Dobot Robot Arm<br/>Physical handwriting on paper]
-  
-![SVG-to-Motion Pipeline](svg_robot_pipeline.svg)
+OPTIONAL RELATED SCRIPT (Manual demo / quick test):
+ ┌──────────────────────────────────────────────────────────────────┐
+ │ trial.py                                                          │
+ │  - Connect, move to preset points                                 │
+ │  - Conditional motion based on user input                          │
+ │  - Useful for workspace checks and quick motion tests              │
+ └──────────────────────────────────────────────────────────────────┘
+## Repository Structure
+```graphql
+Image-to-Trajectory_Robot_Controller
+├── read.py        # SVG → normalized stroke text
+├── write_1.py     # Execute one character (stroke-level control)
+├── model_4.py     # Poem/page-level orchestration
+├── trial.py       # Manual motion demo & workspace testing
+├── char/          # Per-character stroke files (.txt)
+└── README.md
+```
+
