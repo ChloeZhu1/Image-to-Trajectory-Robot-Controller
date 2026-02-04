@@ -11,8 +11,6 @@ The system bridges computer graphics, geometric path planning, and real-world ro
 * 🧭 Deterministic queued motion execution
 * 📐 Human-robot interaction of alignment correction for real-world paper handling
 ## System Pipeline
-
-```mermaid
 flowchart TD
   A[SVG Character Files<br/>(vector strokes)] --> B[read.py<br/>Parse polylines + extract points]
   B --> C[Normalize + scale coordinates<br/>(origin shift, /450)]
@@ -33,5 +31,5 @@ flowchart TD
   E4 --> G[Dobot SDK Layer<br/>(DobotDllType + DobotDll.dll)]
   F4 --> G
   G --> H[Dobot Robot Arm<br/>Physical handwriting on paper]
-```
+  
 ![SVG-to-Motion Pipeline](svg_robot_pipeline.svg)
