@@ -150,4 +150,28 @@ Image-to-Trajectory_Robot_Controller/
 ## How It Works
 1. SVG Parsing
 * Characters are represented as SVG files composed of stroke polylines.
-* [read.py](Initial setup/read.py) extracts stroke points, normalizes coordinates, and inserts stroke separators.
+* read.py extracts stroke points, normalizes coordinates, and inserts stroke separators.
+2. Stroke Execution
+* write_1.py executes one character at a time:
+ * Move to stroke start (pen up)
+ * Lower pen (pen down)
+ * Trace stroke points
+ * Lift pen (pen up)
+3. Poem Layout
+* model_4.py arranges characters in a grid (e.g. 4×7 layout).
+* Each character is written sequentially.
+* Manual alignment correction compensates for paper movement.
+
+## Technologies Used
+* **Hardware**: Dobot robotic arm
+* **Language**: Python (ctypes DLL bindings)
+* **Robot Control**: Dobot SDK (PTP Cartesian motion)
+* **Geometry**: SVG stroke extraction & normalization
+
+## Example Use Cases
+* Robotic handwriting and calligraphy demos
+* Human–robot interaction experiments
+* Vector-to-motion research
+
+## One-Line Summary
+An end-to-end system that converts SVG character strokes into precise robotic handwriting using a Dobot manipulator.
