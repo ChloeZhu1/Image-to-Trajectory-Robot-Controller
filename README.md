@@ -147,4 +147,7 @@ Image-to-Trajectory_Robot_Controller/
     ├── run_demo.sh
     └── connect_robot.py
 ```
-
+## How It Works
+1. SVG Parsing
+* Characters are represented as SVG files composed of stroke polylines.
+* [read.py](Initial setup/read.py) extracts stroke points, normalizes coordinates, and inserts stroke separators.
