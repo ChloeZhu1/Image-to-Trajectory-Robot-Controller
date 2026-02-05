@@ -104,12 +104,47 @@ OPTIONAL RELATED SCRIPT (Manual demo / quick test):
 ```
 ## Repository Structure
 ```graphql
-Image-to-Trajectory_Robot_Controller
-├── read.py        # SVG → normalized stroke text
-├── write_1.py     # Execute one character (stroke-level control)
-├── model_4.py     # Poem/page-level orchestration
-├── trial.py       # Manual motion demo & workspace testing
-├── char/          # Per-character stroke files (.txt)
-└── README.md
+Image-to-Trajectory_Robot_Controller/
+├── README.md
+├── LICENSE
+├── .gitignore
+│
+├── src/
+│   ├── __init__.py
+│   ├── main.py
+│   ├── controller/
+│   │   ├── __init__.py
+│   │   ├── dobot_controller.py
+│   │   ├── motion_commands.py
+│   │   └── safety_checks.py
+│   │
+│   ├── communication/
+│   │   ├── __init__.py
+│   │   ├── serial_interface.py
+│   │   └── protocol.py
+│   │
+│   └── utils/
+│       ├── __init__.py
+│       ├── config.py
+│       └── logger.py
+│
+├── examples/
+│   ├── basic_motion.py
+│   ├── pick_and_place.py
+│   ├── trajectory_demo.py
+│   └── calibration_example.py
+│
+├── config/
+│   ├── default.yaml
+│   └── hardware.yaml
+│
+├── tests/
+│   ├── test_connection.py
+│   ├── test_motion.py
+│   └── test_safety.py
+│
+└── scripts/
+    ├── run_demo.sh
+    └── connect_robot.py
 ```
 
